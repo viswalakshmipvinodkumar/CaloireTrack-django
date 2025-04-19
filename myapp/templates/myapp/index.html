@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriTrack - Calorie Tracker</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+        }
+        
+        .btn-success {
+            background-color: #43cea2;
+            border-color: #43cea2;
+        }
+        
+        .btn-success:hover {
+            background-color: #3bb292;
+            border-color: #3bb292;
+        }
+        
+        .btn-danger {
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            line-height: 30px;
+            text-align: center;
+        }
+        
+        .progress {
+            height: 20px;
+            border-radius: 10px;
+        }
+        
+        .progress-bar {
+            background-color: #43cea2;
+        }
+        
+        .table th {
+            font-weight: 600;
+        }
+
+        .quantity-badge {
+            background-color: #f8f9fa;
+            color: #343a40;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <strong>NutriTrack</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'index' %}">Calorie Tracker</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'profile' %}">My Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header text-center">
+        <div class="container">
+            <h1>Your Nutrition Dashboard</h1>
+            <p class="lead">Track your daily calories and nutrients</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Messages section -->
+        {% if messages %}
+        <div class="row mb-4">
+            <div class="col-md-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Food Selection Form -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Add Food Item</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group row align-items-center">
+                        <label class="col-md-2 col-form-label font-weight-bold">
+                            Select Food:
+                        </label>
+                        <div class="col-md-5">
+                            <select class="form-control" name="food_consumed" id="food_consumed">
+                                {% for food in foods %}
+                                <option value="{{food.name}}">{{food.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Quantity</span>
+                                </div>
+                                <input type="number" class="form-control" name="quantity" id="quantity" value="1" min="0.1" step="0.1">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-success btn-block" type="submit">Add</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Calorie Goal Progress -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">Daily Calorie Goal</h4>
+            </div>
+            <div class="card-body">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0"
+                        aria-valuemin="0" aria-valuemax="{{ calorie_goal }}"></div>
+                </div>
+                <div class="text-right mt-2">
+                    <span id="calorieCount">0</span> / {{ calorie_goal }} kcal
+                    {% if user.is_authenticated %}
+                    <small class="d-block text-muted">
+                        <a href="{% url 'profile' %}">Adjust your goal in profile settings</a>
+                    </small>
+                    {% else %}
+                    <small class="d-block text-muted">
+                        <a href="{% url 'login' %}">Log in</a> or <a href="{% url 'register' %}">register</a> to set your own goals
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Food Consumption Table -->
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Today's Consumption</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="table" class="table table-hover">
+                                <thead>
+                                    <tr class="bg-light">
+                                        <th>Food Item</th>
+                                        <th>Qty</th>
+                                        <th>Carbs (g)</th>
+                                        <th>Protein (g)</th>
+                                        <th>Fats (g)</th>
+                                        <th>Calories (kcal)</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for c in consumed_food %}
+                                    <tr>
+                                        <td>{{c.food_consumed.name}}</td>
+                                        <td>{{c.quantity}}</td>
+                                        <td>{{c.adjusted_carbs}}</td>
+                                        <td>{{c.adjusted_protein}}</td>
+                                        <td>{{c.adjusted_fats}}</td>
+                                        <td>{{c.adjusted_calories}}</td>
+                                        <td><a class="btn btn-danger" href="{% url 'delete' c.pk %}">×</a></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-light font-weight-bold">
+                                        <td>Total</td>
+                                        <td></td>
+                                        <td id="totalCarbs"></td>
+                                        <td id="totalProtien"></td>
+                                        <td id="totalFats"></td>
+                                        <td id="totalCalories"></td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nutrition Breakdown Chart -->
+            <div class="col-lg-5">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="mb-0">Nutrients Breakdown</h4>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="myChart" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0"> 2025 NutriTrack - Smart Calorie Tracking. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <!-- Calculation Script -->
+    <script>
+        var table = document.getElementById("table");
+        var carbs = 0, protein = 0, fats = 0, calories = 0;
+
+        for (var i = 1; i < table.rows.length - 1; i++) {
+            carbs += parseFloat(table.rows[i].cells[2].innerHTML);
+            carbs = Math.round(carbs * 10) / 10;
+            protein += parseFloat(table.rows[i].cells[3].innerHTML);
+            protein = Math.round(protein * 10) / 10;
+            fats += parseFloat(table.rows[i].cells[4].innerHTML);
+            fats = Math.round(fats * 10) / 10;
+            calories += parseFloat(table.rows[i].cells[5].innerHTML);
+            calories = Math.round(calories);
+        }
+
+        document.getElementById("totalCarbs").innerHTML = carbs + ' g';
+        document.getElementById("totalProtien").innerHTML = protein + ' g';
+        document.getElementById("totalFats").innerHTML = fats + ' g';
+        document.getElementById("totalCalories").innerHTML = calories + ' kcal';
+        document.getElementById("calorieCount").innerHTML = calories;
+
+        // Get calorie goal from a data attribute to avoid JS syntax errors with Django template variables
+        var calorieGoal = parseInt("{{ calorie_goal }}") || 2000;
+        
+        // Calculate calorie percentage safely
+        var calPer = 0;
+        if (calorieGoal > 0) {
+            calPer = (calories / calorieGoal) * 100;
+        }
+        document.getElementsByClassName("progress-bar")[0].setAttribute("style", "width:" + calPer + "%");
+
+        var total = carbs + protein + fats;
+        var carbsP = Math.round((carbs / total) * 100);
+        var protienP = Math.round((protein / total) * 100);
+        var fatsP = Math.round((fats / total) * 100);
+
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Carbs ' + carbsP + '%', 'Protein ' + protienP + '%', 'Fats ' + fatsP + '%'],
+                datasets: [{
+                    data: [carbsP, protienP, fatsP],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        });
+    </script>
+</body>
+</html>

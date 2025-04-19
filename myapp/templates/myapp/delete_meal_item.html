@@ -1,0 +1,42 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}Delete Food Item{% endblock %}
+
+{% block content %}
+<div class="page-header text-center">
+    <div class="container">
+        <h1>Delete Food Item</h1>
+        <p class="lead">Are you sure you want to remove this food from your meal plan?</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Confirm Deletion</h4>
+                </div>
+                <div class="card-body">
+                    <p class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        You are about to remove <strong>{{ meal_item.food.name }}</strong> 
+                        ({{ meal_item.quantity }} serving(s)) from your 
+                        <strong>{{ meal_item.get_meal_type_display }}</strong> in 
+                        <strong>"{{ meal_plan.name }}"</strong>.
+                    </p>
+                    <p>This action cannot be undone.</p>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="form-group text-right">
+                            <a href="{% url 'meal_plan_detail' meal_plan.id %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriTrack - Smart Calorie Tracking</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            color: white;
+            padding: 80px 0;
+            border-radius: 0 0 50px 50px;
+            margin-bottom: 40px;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #43cea2;
+        }
+        
+        .cta-section {
+            background-color: #f1f8ff;
+            padding: 60px 0;
+            border-radius: 15px;
+            margin: 40px 0;
+        }
+        
+        .btn-primary {
+            background-color: #43cea2;
+            border-color: #43cea2;
+            padding: 10px 25px;
+            font-weight: 600;
+            border-radius: 30px;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3bb292;
+            border-color: #3bb292;
+        }
+        
+        .btn-outline-primary {
+            color: #43cea2;
+            border-color: #43cea2;
+            padding: 10px 25px;
+            font-weight: 600;
+            border-radius: 30px;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: #43cea2;
+            border-color: #43cea2;
+        }
+        
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 30px 0;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <strong>NutriTrack</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'index' %}">Calorie Tracker</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'profile' %}">My Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">Register</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages section -->
+    {% if messages %}
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col-md-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Hero Section -->
+    <section class="hero text-center">
+        <div class="container">
+            <h1>NutriTrack</h1>
+            <p class="lead">Smart calorie tracking for a healthier lifestyle</p>
+            <div class="mt-4">
+                {% if user.is_authenticated %}
+                <a href="{% url 'index' %}" class="btn btn-light btn-lg mr-2">My Dashboard</a>
+                <a href="{% url 'profile' %}" class="btn btn-outline-light btn-lg">My Profile</a>
+                {% else %}
+                <a href="{% url 'register' %}" class="btn btn-light btn-lg mr-2">Sign Up</a>
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="container">
+        <div class="text-center mb-5">
+            <h2>Why Choose NutriTrack?</h2>
+            <p class="text-muted">Simplify your nutrition tracking with our powerful features</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h4>Detailed Analytics</h4>
+                    <p>Track your macronutrients and calories with beautiful, easy-to-understand charts.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">🍎</div>
+                    <h4>Extensive Food Database</h4>
+                    <p>Access nutritional information for thousands of foods to make informed choices.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h4>Quick & Easy</h4>
+                    <p>Add foods to your daily log in seconds with our intuitive interface.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Features Section -->
+    <section class="container">
+        <div class="text-center mb-5">
+            <h2>What's New in NutriTrack</h2>
+            <p class="text-muted">Take your nutrition tracking to the next level with our latest features</p>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-utensils fa-3x mb-3 text-primary"></i>
+                        <h4>Track Your Food</h4>
+                        <p>Log your daily meals and track your calorie intake with our easy-to-use food tracker.</p>
+                        <a href="{% url 'index' %}" class="btn btn-primary">Start Tracking</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar-alt fa-3x mb-3 text-success"></i>
+                        <h4>Plan Your Meals</h4>
+                        <p>Create meal plans in advance to stay on track with your nutrition goals.</p>
+                        <a href="{% url 'meal_plans' %}" class="btn btn-success">Create Meal Plan</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-3x mb-3 text-info"></i>
+                        <h4>Visualize Progress</h4>
+                        <p>View detailed charts and statistics about your nutrition habits and progress.</p>
+                        <a href="{% url 'dashboard' %}" class="btn btn-info">View Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container text-center">
+            <h2>Ready to Start Your Health Journey?</h2>
+            <p class="mb-4">Begin tracking your nutrition today and take control of your health.</p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'index' %}" class="btn btn-primary btn-lg">Go to My Dashboard</a>
+            {% else %}
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Create Free Account</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="container">
+        <div class="text-center mb-5">
+            <h2>How It Works</h2>
+            <p class="text-muted">Three simple steps to better nutrition tracking</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4 text-center">
+                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 100px; height: 100px;">
+                    <h3>1</h3>
+                </div>
+                <h4>Select Your Food</h4>
+                <p>Choose from our extensive database of foods with complete nutritional information.</p>
+            </div>
+            
+            <div class="col-md-4 mb-4 text-center">
+                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 100px; height: 100px;">
+                    <h3>2</h3>
+                </div>
+                <h4>Add to Your Log</h4>
+                <p>With one click, add the food to your daily consumption log.</p>
+            </div>
+            
+            <div class="col-md-4 mb-4 text-center">
+                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 100px; height: 100px;">
+                    <h3>3</h3>
+                </div>
+                <h4>Track & Analyze</h4>
+                <p>View detailed breakdowns of your nutrition and track your progress over time.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center">
+        <div class="container">
+            <p> 2025 NutriTrack - Smart Calorie Tracking. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</body>
+</html>

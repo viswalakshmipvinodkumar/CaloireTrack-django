@@ -1,0 +1,422 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}Nutrition Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.css">
+<style>
+    .stat-card {
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        color: white;
+        text-align: center;
+    }
+    
+    .stat-card h2 {
+        font-size: 2.5rem;
+        margin-bottom: 5px;
+    }
+    
+    .stat-card p {
+        margin-bottom: 0;
+        opacity: 0.8;
+    }
+    
+    .bg-over {
+        background: linear-gradient(135deg, #ff5f6d 0%, #ffc371 100%);
+    }
+    
+    .bg-under {
+        background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+    }
+    
+    .bg-at {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 30px;
+    }
+    
+    .goal-comparison {
+        position: relative;
+        height: 50px;
+        background-color: #f8f9fa;
+        border-radius: 25px;
+        margin-bottom: 15px;
+    }
+    
+    .goal-actual {
+        position: absolute;
+        height: 100%;
+        border-radius: 25px;
+        background-color: #43cea2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+    
+    .goal-marker {
+        position: absolute;
+        height: 100%;
+        width: 3px;
+        background-color: #dc3545;
+        z-index: 10;
+    }
+    
+    .goal-marker::after {
+        content: 'Goal';
+        position: absolute;
+        top: -25px;
+        left: -10px;
+        color: #dc3545;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header text-center">
+    <div class="container">
+        <h1>Your Nutrition Dashboard</h1>
+        <p class="lead">Visualize your nutrition data and track your progress</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Messages section -->
+    {% if messages %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Goal Achievement Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stat-card bg-over">
+                <i class="fas fa-arrow-up fa-2x mb-3"></i>
+                <h2>{{ days_over_goal }}</h2>
+                <p>Days Over Calorie Goal</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card bg-at">
+                <i class="fas fa-check fa-2x mb-3"></i>
+                <h2>{{ days_at_goal }}</h2>
+                <p>Days At Calorie Goal</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card bg-under">
+                <i class="fas fa-arrow-down fa-2x mb-3"></i>
+                <h2>{{ days_under_goal }}</h2>
+                <p>Days Under Calorie Goal</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Calorie Intake Over Time -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Calorie Intake Over Time</h4>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="calorieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Macronutrient Distribution -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Macronutrient Distribution</h4>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="macroChart"></canvas>
+                    </div>
+                    <div class="text-center mt-3">
+                        <div class="d-flex justify-content-between">
+                            <span><i class="fas fa-circle text-danger"></i> Carbs: {{ avg_carbs_pct }}%</span>
+                            <span><i class="fas fa-circle text-primary"></i> Protein: {{ avg_proteins_pct }}%</span>
+                            <span><i class="fas fa-circle text-warning"></i> Fats: {{ avg_fats_pct }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Most Consumed Foods -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Most Consumed Foods</h4>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="foodChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nutrient Tracking -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Nutrient Tracking</h4>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="nutrientChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Comparison -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0">Your Goals vs. Actual Consumption</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Calories</h5>
+                        <p class="text-muted">Goal: {{ nutrition_goal.daily_calories }} kcal</p>
+                        <div class="goal-comparison">
+                            <div class="goal-marker" style="left: {{ nutrition_goal.daily_calories / 30 }}%;"></div>
+                            {% if daily_calories %}
+                            <div class="goal-actual" style="width: {{ daily_calories|last|default:0 / 30 }}%;">
+                                {{ daily_calories|last|default:0 }} kcal
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Carbohydrates</h5>
+                        <p class="text-muted">Goal: {{ nutrition_goal.daily_carbs_grams }}g ({{ nutrition_goal.carbs_percent }}%)</p>
+                        <div class="goal-comparison">
+                            <div class="goal-marker" style="left: {{ nutrition_goal.daily_carbs_grams / 3 }}%;"></div>
+                            {% if daily_carbs %}
+                            <div class="goal-actual" style="width: {{ daily_carbs|last|default:0 / 3 }}%;">
+                                {{ daily_carbs|last|default:0 }}g
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Protein</h5>
+                        <p class="text-muted">Goal: {{ nutrition_goal.daily_protein_grams }}g ({{ nutrition_goal.protein_percent }}%)</p>
+                        <div class="goal-comparison">
+                            <div class="goal-marker" style="left: {{ nutrition_goal.daily_protein_grams / 1.5 }}%;"></div>
+                            {% if daily_proteins %}
+                            <div class="goal-actual" style="width: {{ daily_proteins|last|default:0 / 1.5 }}%;">
+                                {{ daily_proteins|last|default:0 }}g
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h5>Fats</h5>
+                        <p class="text-muted">Goal: {{ nutrition_goal.daily_fat_grams }}g ({{ nutrition_goal.fat_percent }}%)</p>
+                        <div class="goal-comparison">
+                            <div class="goal-marker" style="left: {{ nutrition_goal.daily_fat_grams / 1 }}%;"></div>
+                            {% if daily_fats %}
+                            <div class="goal-actual" style="width: {{ daily_fats|last|default:0 / 1 }}%;">
+                                {{ daily_fats|last|default:0 }}g
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+<script>
+    // Data from Django view
+    const dates = {{ dates|safe }};
+    const dailyCalories = {{ daily_calories|safe }};
+    const dailyCarbs = {{ daily_carbs|safe }};
+    const dailyProteins = {{ daily_proteins|safe }};
+    const dailyFats = {{ daily_fats|safe }};
+    const foodNames = {{ food_names|safe }};
+    const foodCounts = {{ food_counts|safe }};
+    const avgCarbsPct = {{ avg_carbs_pct }};
+    const avgProteinsPct = {{ avg_proteins_pct }};
+    const avgFatsPct = {{ avg_fats_pct }};
+    
+    // Calorie Intake Chart
+    const calorieCtx = document.getElementById('calorieChart').getContext('2d');
+    new Chart(calorieCtx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Calories',
+                data: dailyCalories,
+                backgroundColor: 'rgba(67, 206, 162, 0.2)',
+                borderColor: 'rgba(67, 206, 162, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(67, 206, 162, 1)',
+                pointRadius: 4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    gridLines: {
+                        display: false
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+    
+    // Macronutrient Distribution Chart
+    const macroCtx = document.getElementById('macroChart').getContext('2d');
+    new Chart(macroCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Carbs', 'Protein', 'Fats'],
+            datasets: [{
+                data: [avgCarbsPct, avgProteinsPct, avgFatsPct],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                position: 'bottom'
+            }
+        }
+    });
+    
+    // Most Consumed Foods Chart
+    const foodCtx = document.getElementById('foodChart').getContext('2d');
+    new Chart(foodCtx, {
+        type: 'horizontalBar',
+        data: {
+            labels: foodNames,
+            datasets: [{
+                label: 'Times Consumed',
+                data: foodCounts,
+                backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        stepSize: 1
+                    }
+                }]
+            }
+        }
+    });
+    
+    // Nutrient Tracking Chart
+    const nutrientCtx = document.getElementById('nutrientChart').getContext('2d');
+    new Chart(nutrientCtx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Carbs (g)',
+                data: dailyCarbs,
+                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                pointRadius: 2,
+                fill: false
+            }, {
+                label: 'Protein (g)',
+                data: dailyProteins,
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                pointRadius: 2,
+                fill: false
+            }, {
+                label: 'Fats (g)',
+                data: dailyFats,
+                backgroundColor: 'rgba(255, 206, 86, 0.1)',
+                borderColor: 'rgba(255, 206, 86, 1)',
+                borderWidth: 2,
+                pointRadius: 2,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    gridLines: {
+                        display: false
+                    }
+                }],
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+</script>
+{% endblock %}

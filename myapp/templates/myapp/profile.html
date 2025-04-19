@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriTrack - My Profile</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background-color: #43cea2;
+            border-color: #43cea2;
+            padding: 8px 20px;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3bb292;
+            border-color: #3bb292;
+        }
+        
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2.5rem;
+            color: #6c757d;
+        }
+        
+        .quantity-badge {
+            background-color: #f8f9fa;
+            color: #343a40;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        
+        .goal-card {
+            border-left: 4px solid #43cea2;
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        
+        .goal-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #343a40;
+        }
+        
+        .goal-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <strong>NutriTrack</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'index' %}">Calorie Tracker</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'profile' %}">My Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header text-center">
+        <div class="container">
+            <h1>My Profile</h1>
+            <p class="lead">Manage your account and nutrition goals</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Messages section -->
+        {% if messages %}
+        <div class="row mb-4">
+            <div class="col-md-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Account Information</h4>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="profile-img">
+                            {{ user.username.0|upper }}
+                        </div>
+                        <h5>{{ user.username }}</h5>
+                        <p class="text-muted">{{ user.email }}</p>
+                        <p>Member since: {{ user.date_joined|date:"F j, Y" }}</p>
+                        <a href="#" class="btn btn-outline-primary btn-sm">Edit Profile</a>
+                    </div>
+                </div>
+                
+                <!-- Current Goals Summary -->
+                <div class="card mt-4">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">Current Goals</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="goal-card">
+                            <div class="goal-value">{{ goals.daily_calories }} kcal</div>
+                            <div class="goal-label">Daily Calorie Target</div>
+                        </div>
+                        
+                        <div class="goal-card">
+                            <div class="goal-value">{{ goals.carbs_percent }}% ({{ goals.daily_carbs_grams }}g)</div>
+                            <div class="goal-label">Carbohydrates</div>
+                        </div>
+                        
+                        <div class="goal-card">
+                            <div class="goal-value">{{ goals.protein_percent }}% ({{ goals.daily_protein_grams }}g)</div>
+                            <div class="goal-label">Protein</div>
+                        </div>
+                        
+                        <div class="goal-card">
+                            <div class="goal-value">{{ goals.fat_percent }}% ({{ goals.daily_fat_grams }}g)</div>
+                            <div class="goal-label">Fat</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Nutrition Goals</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="daily_calories">Daily Calorie Goal</label>
+                                <input type="number" class="form-control" id="daily_calories" name="daily_calories" value="{{ goals.daily_calories }}" min="1000" max="5000">
+                                <small class="form-text text-muted">Recommended range: 1500-2500 calories for most adults</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Macronutrient Distribution (must add up to 100%)</label>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="carbs_percent">Carbs (%)</label>
+                                        <input type="number" class="form-control" id="carbs_percent" name="carbs_percent" value="{{ goals.carbs_percent }}" min="0" max="100">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="protein_percent">Protein (%)</label>
+                                        <input type="number" class="form-control" id="protein_percent" name="protein_percent" value="{{ goals.protein_percent }}" min="0" max="100">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="fat_percent">Fat (%)</label>
+                                        <input type="number" class="form-control" id="fat_percent" name="fat_percent" value="{{ goals.fat_percent }}" min="0" max="100">
+                                    </div>
+                                </div>
+                                <div class="text-right mt-2">
+                                    <span id="total-percent">Total: {{ goals.carbs_percent|add:goals.protein_percent|add:goals.fat_percent }}%</span>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Goals</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="mb-0">Recent Activity</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            {% for item in recent_items %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">
+                                        {{ item.food_consumed.name }}
+                                        <span class="quantity-badge">{{ item.quantity }} serving(s)</span>
+                                    </h5>
+                                    <small>{{ item.date_added|date:"M d, h:i a"|default:"Today" }}</small>
+                                </div>
+                                <p class="mb-1">
+                                    Calories: {{ item.adjusted_calories }} kcal | 
+                                    Carbs: {{ item.adjusted_carbs }}g | 
+                                    Protein: {{ item.adjusted_protein }}g | 
+                                    Fats: {{ item.adjusted_fats }}g
+                                </p>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-3">
+                                <p class="text-muted">No recent activity</p>
+                                <a href="{% url 'index' %}" class="btn btn-primary">Start Tracking</a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0"> 2025 NutriTrack - Smart Calorie Tracking. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    
+    <!-- Percentage Calculator Script -->
+    <script>
+        $(document).ready(function() {
+            // Update total percentage when any input changes
+            $('#carbs_percent, #protein_percent, #fat_percent').on('input', function() {
+                var carbs = parseInt($('#carbs_percent').val()) || 0;
+                var protein = parseInt($('#protein_percent').val()) || 0;
+                var fat = parseInt($('#fat_percent').val()) || 0;
+                var total = carbs + protein + fat;
+                
+                $('#total-percent').text('Total: ' + total + '%');
+                
+                // Highlight if not 100%
+                if (total !== 100) {
+                    $('#total-percent').addClass('text-danger font-weight-bold');
+                } else {
+                    $('#total-percent').removeClass('text-danger font-weight-bold');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

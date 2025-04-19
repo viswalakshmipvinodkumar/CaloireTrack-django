@@ -1,0 +1,90 @@
+{% extends 'myapp/base.html' %}
+
+{% block content %}
+<div class="page-header text-center">
+    <div class="container">
+        <h1>Meal Plans</h1>
+        <p class="lead">Plan your meals in advance to stay on track with your nutrition goals</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Messages section -->
+    {% if messages %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row mb-4">
+        <div class="col-md-12 text-right">
+            <a href="{% url 'create_meal_plan' %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Create New Meal Plan
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Your Meal Plans</h4>
+                </div>
+                <div class="card-body">
+                    {% if meal_plans %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr class="bg-light">
+                                    <th>Name</th>
+                                    <th>Date</th>
+                                    <th>Calories</th>
+                                    <th>Carbs</th>
+                                    <th>Protein</th>
+                                    <th>Fats</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for plan in meal_plans %}
+                                <tr>
+                                    <td><a href="{% url 'meal_plan_detail' plan.id %}">{{ plan.name }}</a></td>
+                                    <td>{{ plan.date }}</td>
+                                    <td>{{ plan.total_calories }} kcal</td>
+                                    <td>{{ plan.total_carbs }}g</td>
+                                    <td>{{ plan.total_protein }}g</td>
+                                    <td>{{ plan.total_fats }}g</td>
+                                    <td>
+                                        <a href="{% url 'meal_plan_detail' plan.id %}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'delete_meal_plan' plan.id %}" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <h5 class="text-muted">You don't have any meal plans yet</h5>
+                        <p>Create your first meal plan to start planning your nutrition</p>
+                        <a href="{% url 'create_meal_plan' %}" class="btn btn-primary mt-3">
+                            Create Your First Meal Plan
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

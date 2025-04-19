@@ -1,0 +1,326 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}{{ meal_plan.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header text-center">
+    <div class="container">
+        <h1>{{ meal_plan.name }}</h1>
+        <p class="lead">{{ meal_plan.date|date:"F j, Y" }}</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Messages section -->
+    {% if messages %}
+    <div class="row mb-4">
+        <div class="col-md-12">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row mb-4">
+        <div class="col-md-12 d-flex justify-content-between">
+            <a href="{% url 'meal_plans' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Meal Plans
+            </a>
+            <a href="{% url 'add_meal_item' meal_plan.id %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add Food Item
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Meal Plan Content -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Meal Plan Content</h4>
+                </div>
+                <div class="card-body">
+                    {% if breakfast_items or lunch_items or dinner_items or snack_items %}
+                        <!-- Breakfast -->
+                        <div class="meal-section mb-4">
+                            <h5 class="meal-type-header">
+                                <i class="fas fa-sun"></i> Breakfast
+                            </h5>
+                            {% if breakfast_items %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr class="bg-light">
+                                                <th>Food</th>
+                                                <th>Quantity</th>
+                                                <th>Calories</th>
+                                                <th>Carbs</th>
+                                                <th>Protein</th>
+                                                <th>Fats</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in breakfast_items %}
+                                            <tr>
+                                                <td>{{ item.food.name }}</td>
+                                                <td>{{ item.quantity }}</td>
+                                                <td>{{ item.adjusted_calories }} kcal</td>
+                                                <td>{{ item.adjusted_carbs }}g</td>
+                                                <td>{{ item.adjusted_protein }}g</td>
+                                                <td>{{ item.adjusted_fats }}g</td>
+                                                <td>
+                                                    <a href="{% url 'delete_meal_item' item.id %}" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No breakfast items added yet</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Lunch -->
+                        <div class="meal-section mb-4">
+                            <h5 class="meal-type-header">
+                                <i class="fas fa-cloud-sun"></i> Lunch
+                            </h5>
+                            {% if lunch_items %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr class="bg-light">
+                                                <th>Food</th>
+                                                <th>Quantity</th>
+                                                <th>Calories</th>
+                                                <th>Carbs</th>
+                                                <th>Protein</th>
+                                                <th>Fats</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in lunch_items %}
+                                            <tr>
+                                                <td>{{ item.food.name }}</td>
+                                                <td>{{ item.quantity }}</td>
+                                                <td>{{ item.adjusted_calories }} kcal</td>
+                                                <td>{{ item.adjusted_carbs }}g</td>
+                                                <td>{{ item.adjusted_protein }}g</td>
+                                                <td>{{ item.adjusted_fats }}g</td>
+                                                <td>
+                                                    <a href="{% url 'delete_meal_item' item.id %}" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No lunch items added yet</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Dinner -->
+                        <div class="meal-section mb-4">
+                            <h5 class="meal-type-header">
+                                <i class="fas fa-moon"></i> Dinner
+                            </h5>
+                            {% if dinner_items %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr class="bg-light">
+                                                <th>Food</th>
+                                                <th>Quantity</th>
+                                                <th>Calories</th>
+                                                <th>Carbs</th>
+                                                <th>Protein</th>
+                                                <th>Fats</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in dinner_items %}
+                                            <tr>
+                                                <td>{{ item.food.name }}</td>
+                                                <td>{{ item.quantity }}</td>
+                                                <td>{{ item.adjusted_calories }} kcal</td>
+                                                <td>{{ item.adjusted_carbs }}g</td>
+                                                <td>{{ item.adjusted_protein }}g</td>
+                                                <td>{{ item.adjusted_fats }}g</td>
+                                                <td>
+                                                    <a href="{% url 'delete_meal_item' item.id %}" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No dinner items added yet</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Snacks -->
+                        <div class="meal-section">
+                            <h5 class="meal-type-header">
+                                <i class="fas fa-cookie"></i> Snacks
+                            </h5>
+                            {% if snack_items %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr class="bg-light">
+                                                <th>Food</th>
+                                                <th>Quantity</th>
+                                                <th>Calories</th>
+                                                <th>Carbs</th>
+                                                <th>Protein</th>
+                                                <th>Fats</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in snack_items %}
+                                            <tr>
+                                                <td>{{ item.food.name }}</td>
+                                                <td>{{ item.quantity }}</td>
+                                                <td>{{ item.adjusted_calories }} kcal</td>
+                                                <td>{{ item.adjusted_carbs }}g</td>
+                                                <td>{{ item.adjusted_protein }}g</td>
+                                                <td>{{ item.adjusted_fats }}g</td>
+                                                <td>
+                                                    <a href="{% url 'delete_meal_item' item.id %}" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No snack items added yet</p>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <h5 class="text-muted">This meal plan is empty</h5>
+                            <p>Start adding food items to your meal plan</p>
+                            <a href="{% url 'add_meal_item' meal_plan.id %}" class="btn btn-primary mt-3">
+                                Add Your First Food Item
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Meal Plan Summary -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Nutritional Summary</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Total Calories:</span>
+                        <strong>{{ meal_plan.total_calories }} kcal</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Total Carbs:</span>
+                        <strong>{{ meal_plan.total_carbs }}g</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Total Protein:</span>
+                        <strong>{{ meal_plan.total_protein }}g</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Total Fats:</span>
+                        <strong>{{ meal_plan.total_fats }}g</strong>
+                    </div>
+
+                    <hr>
+
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-danger" role="progressbar" 
+                             style="width: {% if meal_plan.total_calories %}{{ meal_plan.total_calories }}{% else %}0{% endif %}%"
+                             aria-valuenow="{% if meal_plan.total_calories %}{{ meal_plan.total_calories }}{% else %}0{% endif %}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            Calories
+                        </div>
+                    </div>
+                    
+                    {% if meal_plan.total_calories > 0 %}
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-primary" role="progressbar" 
+                             style="width: {% if meal_plan.total_carbs %}{{ meal_plan.total_carbs }}{% else %}0{% endif %}%"
+                             aria-valuenow="{% if meal_plan.total_carbs %}{{ meal_plan.total_carbs }}{% else %}0{% endif %}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            Carbs
+                        </div>
+                    </div>
+                    
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {% if meal_plan.total_protein %}{{ meal_plan.total_protein }}{% else %}0{% endif %}%"
+                             aria-valuenow="{% if meal_plan.total_protein %}{{ meal_plan.total_protein }}{% else %}0{% endif %}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            Protein
+                        </div>
+                    </div>
+                    
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-warning" role="progressbar" 
+                             style="width: {% if meal_plan.total_fats %}{{ meal_plan.total_fats }}{% else %}0{% endif %}%"
+                             aria-valuenow="{% if meal_plan.total_fats %}{{ meal_plan.total_fats }}{% else %}0{% endif %}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            Fats
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Meal Plan Notes -->
+            {% if meal_plan.notes %}
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">Notes</h4>
+                </div>
+                <div class="card-body">
+                    <p>{{ meal_plan.notes|linebreaks }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">Actions</h4>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'add_meal_item' meal_plan.id %}" class="btn btn-success btn-block mb-2">
+                        <i class="fas fa-plus"></i> Add Food Item
+                    </a>
+                    <a href="{% url 'delete_meal_plan' meal_plan.id %}" class="btn btn-danger btn-block">
+                        <i class="fas fa-trash"></i> Delete Meal Plan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
